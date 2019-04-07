@@ -201,7 +201,7 @@ class UserLoginAPI(APIView):
         # if exist will not create
         if User.objects.filter(username).exists():
             return
-        user = User.objects.create(username, 'test@leaplearner.com')
+        user = User.objects.create(username=username, email='test@leaplearner.com')
         user.set_password(password)
         user.save()
         UserProfile.objects.create(user=user)
