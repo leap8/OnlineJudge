@@ -158,28 +158,28 @@ class UserLoginAPI(APIView):
         """
         User login api
         """
-        data = request.data
-        user = auth.authenticate(username=data["username"], password=data["password"])
-        # None is returned if username or password is wrong
-        if user:
-            if user.is_disabled:
-                return self.error("Your account has been disabled")
-            if not user.two_factor_auth:
-                auth.login(request, user)
-                return self.success("Succeeded")
-
-            # `tfa_code` not in post data
-            if user.two_factor_auth and "tfa_code" not in data:
-                return self.error("tfa_required")
-
-            if OtpAuth(user.tfa_token).valid_totp(data["tfa_code"]):
-                auth.login(request, user)
-                return self.success("Succeeded")
-            else:
-                return self.error("Invalid two factor verification code")
-        else:
-            return self.error("Invalid username or password")
-
+        # data = request.data
+        # user = auth.authenticate(username=data["username"], password=data["password"])
+        # # None is returned if username or password is wrong
+        # if user:
+        #     if user.is_disabled:
+        #         return self.error("Your account has been disabled")
+        #     if not user.two_factor_auth:
+        #         auth.login(request, user)
+        #         return self.success("Succeeded")
+        #
+        #     # `tfa_code` not in post data
+        #     if user.two_factor_auth and "tfa_code" not in data:
+        #         return self.error("tfa_required")
+        #
+        #     if OtpAuth(user.tfa_token).valid_totp(data["tfa_code"]):
+        #         auth.login(request, user)
+        #         return self.success("Succeeded")
+        #     else:
+        #         return self.error("Invalid two factor verification code")
+        # else:
+        #     return self.error("Invalid username or password")
+        return self.error("Invalid username or password")
 
 class UserLogoutAPI(APIView):
     def get(self, request):
