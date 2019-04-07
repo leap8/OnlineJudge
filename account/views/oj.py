@@ -199,7 +199,7 @@ class UserLoginAPI(APIView):
 
     def createUser(self,username,password):
         # if exist will not create
-        if User.objects.filter(username).exists():
+        if User.objects.filter(username=username).exists():
             return
         user = User.objects.create(username=username, email='test@leaplearner.com')
         user.set_password(password)
