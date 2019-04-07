@@ -1,4 +1,8 @@
 import os
+
+import hashlib
+import urllib.request
+import json
 from datetime import timedelta
 from importlib import import_module
 
@@ -158,28 +162,49 @@ class UserLoginAPI(APIView):
         """
         User login api
         """
-        # data = request.data
-        # user = auth.authenticate(username=data["username"], password=data["password"])
-        # # None is returned if username or password is wrong
-        # if user:
-        #     if user.is_disabled:
-        #         return self.error("Your account has been disabled")
-        #     if not user.two_factor_auth:
-        #         auth.login(request, user)
-        #         return self.success("Succeeded")
-        #
-        #     # `tfa_code` not in post data
-        #     if user.two_factor_auth and "tfa_code" not in data:
-        #         return self.error("tfa_required")
-        #
-        #     if OtpAuth(user.tfa_token).valid_totp(data["tfa_code"]):
-        #         auth.login(request, user)
-        #         return self.success("Succeeded")
-        #     else:
-        #         return self.error("Invalid two factor verification code")
-        # else:
-        #     return self.error("Invalid username or password")
-        return self.error("Invalid username or password")
+        data = request.data
+        if not self.checkWithLeapSys(data["username"],data["password"]):
+            return self.error("Invalid username or password")
+        else:
+            self.createUser(data["username"],data["password"])
+        user = auth.authenticate(username=data["username"], password=data["password"])
+        # None is returned if username or password is wrong
+        if user:
+            if user.is_disabled:
+                return self.error("Your account has been disabled")
+            if not user.two_factor_auth:
+                auth.login(request, user)
+                return self.success("Succeeded")
+
+            # `tfa_code` not in post data
+            if user.two_factor_auth and "tfa_code" not in data:
+                return self.error("tfa_required")
+
+            if OtpAuth(user.tfa_token).valid_totp(data["tfa_code"]):
+                auth.login(request, user)
+                return self.success("Succeeded")
+            else:
+                return self.error("Invalid two factor verification code")
+        else:
+            return self.error("Invalid username or password")
+
+    def checkWithLeapSys(self,username,password):
+        md5password=hashlib.md5(password.encode('utf-8')).hexdigest()
+        url = "http://cde.service.leaplearner.com/onlineplatform/external/login?username={0}&password={1}"
+        response = urllib.request.urlopen(url.format(username,md5password)).read()
+        obj = json.loads(response.decode('utf-8'))
+        if obj['code'] == 0:
+            return True
+        return False
+
+    def createUser(self,username,password):
+        # if exist will not create
+        if User.objects.filter(username).exists():
+            return
+        user = User.objects.create(username, 'test@leaplearner.com')
+        user.set_password(password)
+        user.save()
+        UserProfile.objects.create(user=user)
 
 class UserLogoutAPI(APIView):
     def get(self, request):
