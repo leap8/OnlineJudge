@@ -164,9 +164,9 @@ class UserLoginAPI(APIView):
         """
         data = request.data
         if not self.checkWithLeapSys(data["username"],data["password"]):
-            return self.error("Invalid username or password")
-        # else:
-        #     self.createUser(data["username"],data["password"])
+            return self.error("Invalid username or password Check")
+        else:
+            self.createUser(data["username"],data["password"])
         user = auth.authenticate(username=data["username"], password=data["password"])
         # None is returned if username or password is wrong
         if user:
@@ -201,10 +201,10 @@ class UserLoginAPI(APIView):
         # if exist will not create
         if User.objects.filter(username=username).exists():
             return
-        user = User.objects.create(username=username, email=' ')
+        user = User.objects.create(username=username, admin_type=AdminType.REGULAR_USER, problem_permission=ProblemPermission.NONE)
         user.set_password(password)
-        user.save()
         UserProfile.objects.create(user=user)
+        user.save()
 
 class UserLogoutAPI(APIView):
     def get(self, request):
