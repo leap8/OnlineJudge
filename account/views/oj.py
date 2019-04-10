@@ -165,8 +165,8 @@ class UserLoginAPI(APIView):
         data = request.data
         if not self.checkWithLeapSys(data["username"],data["password"]):
             return self.error("Invalid username or password")
-        else:
-            self.createUser(data["username"],data["password"])
+        # else:
+        #     self.createUser(data["username"],data["password"])
         user = auth.authenticate(username=data["username"], password=data["password"])
         # None is returned if username or password is wrong
         if user:
