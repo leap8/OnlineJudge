@@ -203,8 +203,8 @@ class UserLoginAPI(APIView):
             return
         user = User.objects.create(username=username, admin_type=AdminType.REGULAR_USER, problem_permission=ProblemPermission.NONE)
         user.set_password(password)
-        UserProfile.objects.create(user=user)
         user.save()
+        UserProfile.objects.create(user=user)
 
 class UserLogoutAPI(APIView):
     def get(self, request):
